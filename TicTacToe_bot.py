@@ -1,17 +1,53 @@
 import telebot
+from telebot.types import Message
 
 bot = telebot.TeleBot('2142718885:AAFNwMfbBpKq9lrfEvydERsOn4RM5AhjiS8')
+board = [" " for i in range(9)]
+opponentlist = []
 
-def Pbot():
-    print("In PBot")
+def print_board(message):
+    row1="|{}|{}|{}|\n|{}|{}|{}|\n|{}|{}|{}|".format(board[0],board[1],board[2],board[3],board[4],board[5],board[6],board[7],board[8])
+    row2="|{}|{}|{}|".format(board[3],board[4],board[5])
+    row3="|{}|{}|{}|".format(board[6],board[7],board[8])
+    bot.send_message(message.chat.id,row1)
+
+def AddToOpponentList(message):
+    print("In addtoopp")
+    if len(opponentlist) == 0 :
+        opponentlist.append(message.chat.id)
+        print(opponentlist)
+    else:
+        for x in opponentlist :
+            print(x)
+            if x == message.chat.id :
+                print("Already inside waitlist")
+            else:
+                opponentlist.append(message.chat.id)
+                print(opponentlist)
+
+
+def Matchmaking():
+    x = (len(opponentlist))
+    if x >= 2:
+        print("Big 2")
+    else:
+        print("Not Big 2")
+
+def Pbot(message):
+    bot.send_message(message.chat.id,"Looking for an Opponent...")
+    print(message.chat.id)
+    AddToOpponentList(message)
+    Matchmaking()
+
 
 def TwoP():
-    print("In 2P")
+    print_board()
 
 #To Determine Gamemode 2P or Bot
 def TwoPorBot(message):
     if message.text == "2P" :
-        TwoP()    
+        Pbot(message)
+        #print_board(message)
     elif message.text == "Bot" :
         Pbot()
 
