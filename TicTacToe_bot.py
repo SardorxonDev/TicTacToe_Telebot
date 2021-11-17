@@ -91,13 +91,6 @@ def player_move(player):
     sent = bot.send_message(player.userid, "Your turn player {}\nEnter your move (1-9)".format(player.order), reply_markup=markup)
     bot.register_next_step_handler(sent, player_move_select)
 
-    choice = playermove.pop(0)
-    if board[choice - 1] == " ":
-        board[choice - 1] = player.icon
-    else:
-        bot.send_message(player.userid,"Spot Already Taken!")
-        player_move(player)
-
 def AddToOpponentList(message):
     if len(opponentlist) == 0:
         print("Adding {} to waitlist".format(message.chat.id))
