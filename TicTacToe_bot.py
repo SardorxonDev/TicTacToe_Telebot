@@ -42,8 +42,37 @@ def is_draw():
     else:
         return False
 
+def player_move_execution(player):
+    while True:
+        choice = playermove.pop(0)
+        if board[choice - 1] == " ":
+            board[choice - 1] = player.icon
+            break
+        else:
+            print("Spot already taken")
+            player_move(player)
+            continue
+
 def player_move_select(message):
-    playermove.append(int(message.text))    
+    if message.text == '1':
+        playermove.append(1)
+    elif message.text == '2':
+        playermove.append(2)
+    elif message.text == '3':
+        playermove.append(3)
+    elif message.text == '4':
+        playermove.append(4)
+    elif message.text == '5':
+        playermove.append(5)
+    elif message.text == '6':
+        playermove.append(6)
+    elif message.text == '7':
+        playermove.append(7)
+    elif message.text == '8':
+        playermove.append(8)
+    elif message.text == '9':
+        playermove.append(9)
+    
 
 def player_move(player):
     markup = types.ReplyKeyboardMarkup()
@@ -61,6 +90,7 @@ def player_move(player):
     markup.row(itembtn7, itembtn8, itembtn9)
     sent = bot.send_message(player.userid, "Your turn player {}\nEnter your move (1-9)".format(player.order), reply_markup=markup)
     bot.register_next_step_handler(sent, player_move_select)
+
     choice = playermove.pop(0)
     if board[choice - 1] == " ":
         board[choice - 1] = player.icon
@@ -107,6 +137,7 @@ def Gameplay():
     while True:
         print_board(player1.userid,player2.userid)
         player_move(player1)
+        player_move_execution(player1)
         print_board(player1.userid,player2.userid)
         if is_victory(player1.icon):
             bot.send_message(player1.userid,"X wins! Congrats! ")
@@ -118,6 +149,7 @@ def Gameplay():
             break
         bot.send_message(player2.userid,"{} has moved, your turn {}...".format(player1.name,player2.name))
         player_move(player2)
+        player_move_execution(player2)
         print_board(player1.userid,player2.userid)
         if is_victory(player2.icon):
             bot.send_message(player2.userid,"O wins! Congrats! ")
