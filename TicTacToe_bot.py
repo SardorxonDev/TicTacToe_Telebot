@@ -60,7 +60,6 @@ def is_draw():
         return False
 
 def player_move_execution(player):
-    print("inside move exec")
     if player == player1.userid:
         vs = player1
     elif player == player2.userid:
@@ -75,16 +74,12 @@ def player_move_execution(player):
         return 
 
 def player_move_select(message, player):
-    print("inside player_move_select")
     playermove.append(int(message.text))
-    print(player.name)
     #player_move_execution(message.chat.id)
     choice = playermove.pop(0)
     if board[choice - 1] == " ":
         board[choice - 1] = player.icon
         print_board(player1.userid,player2.userid)
-        print(player is player1)
-        print(player == player1)
         if player is player1:
             return player2
         else:
