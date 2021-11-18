@@ -6,6 +6,23 @@ bot = telebot.TeleBot('2142718885:AAFNwMfbBpKq9lrfEvydERsOn4RM5AhjiS8')
 board = [" " for i in range(9)]
 opponentlist = []
 playermove = []
+start_markup = telebot.types.ReplyKeyboardMarkup(
+        resize_keyboard=True, one_time_keyboard=True)
+start_markup.row('2P', "Bot")
+options_markup = telebot.types.ReplyKeyboardMarkup(
+        resize_keyboard=True, one_time_keyboard=True)
+itembtn1 = types.KeyboardButton('1')
+itembtn2 = types.KeyboardButton('2')
+itembtn3 = types.KeyboardButton('3')
+itembtn4 = types.KeyboardButton('4')
+itembtn5 = types.KeyboardButton('5')
+itembtn6 = types.KeyboardButton('6')
+itembtn7 = types.KeyboardButton('7')
+itembtn8 = types.KeyboardButton('8')
+itembtn9 = types.KeyboardButton('9')
+options_markup.row(itembtn1, itembtn2,itembtn3)
+options_markup.row(itembtn4, itembtn5, itembtn6)
+options_markup.row(itembtn7, itembtn8, itembtn9)
 
 class Player:
     def __init__(self, userid, username, opponent, icon, order, match=False):
@@ -43,53 +60,46 @@ def is_draw():
         return False
 
 def player_move_execution(player):
-    while True:
-        choice = playermove.pop(0)
-        if board[choice - 1] == " ":
-            board[choice - 1] = player.icon
-            break
-        else:
-            print("Spot already taken")
-            player_move(player)
-            continue
+    print("inside move exec")
+    if player == player1.userid:
+        vs = player1
+    elif player == player2.userid:
+        vs = player2
+    choice = playermove.pop(0)
+    if board[choice - 1] == " ":
+        board[choice - 1] = vs.icon
+        print_board(player1.userid,player2.userid)
+        return 
+    else:
+        bot.send_message(vs.userid,"Spot already taken")
+        return 
 
-def player_move_select(message):
-    if message.text == '1':
-        playermove.append(1)
-    elif message.text == '2':
-        playermove.append(2)
-    elif message.text == '3':
-        playermove.append(3)
-    elif message.text == '4':
-        playermove.append(4)
-    elif message.text == '5':
-        playermove.append(5)
-    elif message.text == '6':
-        playermove.append(6)
-    elif message.text == '7':
-        playermove.append(7)
-    elif message.text == '8':
-        playermove.append(8)
-    elif message.text == '9':
-        playermove.append(9)
+def player_move_select(message, player):
+    print("inside player_move_select")
+    playermove.append(int(message.text))
+    print(player.name)
+    #player_move_execution(message.chat.id)
+    choice = playermove.pop(0)
+    if board[choice - 1] == " ":
+        board[choice - 1] = player.icon
+        print_board(player1.userid,player2.userid)
+        print(player is player1)
+        print(player == player1)
+        if player is player1:
+            return player2
+        else:
+            return player1
+    else:
+        bot.send_message(message.chat.id,"Spot already taken")
+        return player
     
 
 def player_move(player):
-    markup = types.ReplyKeyboardMarkup()
-    itembtn1 = types.KeyboardButton('1')
-    itembtn2 = types.KeyboardButton('2')
-    itembtn3 = types.KeyboardButton('3')
-    itembtn4 = types.KeyboardButton('4')
-    itembtn5 = types.KeyboardButton('5')
-    itembtn6 = types.KeyboardButton('6')
-    itembtn7 = types.KeyboardButton('7')
-    itembtn8 = types.KeyboardButton('8')
-    itembtn9 = types.KeyboardButton('9')
-    markup.row(itembtn1, itembtn2,itembtn3)
-    markup.row(itembtn4, itembtn5, itembtn6)
-    markup.row(itembtn7, itembtn8, itembtn9)
-    sent = bot.send_message(player.userid, "Your turn player {}\nEnter your move (1-9)".format(player.order), reply_markup=markup)
-    bot.register_next_step_handler(sent, player_move_select)
+    #sent = bot.reply_to(player.userid, "Your turn player {}\nEnter your move (1-9)".format(player.order), reply_markup=start_markup)
+    #print("Entering Player Move Select")
+    #bot.register_next_step_handler(sent, player_move_select)
+    return "Your turn player {}\nEnter your move (1-9)".format(player.order)
+    
 
 def AddToOpponentList(message):
     if len(opponentlist) == 0:
@@ -126,33 +136,32 @@ def Matchmaking():
         else:
             continue
 
-def Gameplay():
-    while True:
-        print_board(player1.userid,player2.userid)
-        player_move(player1)
-        player_move_execution(player1)
-        print_board(player1.userid,player2.userid)
-        if is_victory(player1.icon):
-            bot.send_message(player1.userid,"X wins! Congrats! ")
-            bot.send_message(player2.userid,"X wins! You Lose! ")
-            break
-        elif is_draw():
-            bot.send_message(player1.userid,"It's a draw!")
-            bot.send_message(player2.userid,"It's a draw!")
-            break
-        bot.send_message(player2.userid,"{} has moved, your turn {}...".format(player1.name,player2.name))
-        player_move(player2)
-        player_move_execution(player2)
-        print_board(player1.userid,player2.userid)
-        if is_victory(player2.icon):
-            bot.send_message(player2.userid,"O wins! Congrats! ")
-            bot.send_message(player1.userid,"O wins! You Lose! ")
-            break
-        elif is_draw():
-            bot.send_message(player1.userid,"It's a draw!")
-            bot.send_message(player2.userid,"It's a draw!")
-            break
-        bot.send_message(player1.userid,"{} has moved, your turn {}...".format(player2.name,player1.name))
+def Gameplay(message, player):
+    nxtplayer = player_move_select(message, player)
+    print(nxtplayer.name)
+    end = False
+    if is_victory(player1.icon):
+        bot.send_message(player1.userid,"X wins! Congrats! ")
+        bot.send_message(player2.userid,"X wins! You Lose! ")
+        end = True
+        #break
+    elif is_victory(player2.icon):
+        bot.send_message(player1.userid,"O wins! You Lose! ")
+        bot.send_message(player2.userid,"O wins! Congrats! ")
+        end = True
+        #break
+    elif is_draw():
+        bot.send_message(player1.userid,"It's a draw!")
+        bot.send_message(player2.userid,"It's a draw!")
+        end = True
+        #break
+    #bot.send_message(player2.userid,"{} has moved, your turn {}...".format(player1.name,player2.name))
+    #Gameplay2()
+    if not end:
+        msg = "Your turn player {}\nEnter your move (1-9)".format(nxtplayer.order)
+        sent = bot.send_message(nxtplayer.userid, msg, reply_markup=options_markup)
+        bot.register_next_step_handler(sent, Gameplay, nxtplayer)
+    #Gameplay(player2.userid)
 
 
 # To Determine Gamemode 2P or Bot
@@ -161,23 +170,21 @@ def TwoPorBot(message):
         bot.send_message(message.chat.id, "Looking for an Opponent...")
         AddToOpponentList(message)
         Matchmaking()
-        Gameplay()
+        print_board(player1.userid,player2.userid)
+        msg = "Your turn player {}\nEnter your move (1-9)".format(player1.order)
+        sent = bot.send_message(player1.userid, msg, reply_markup=options_markup)
+        bot.register_next_step_handler(sent, Gameplay, player1)
         print("Out of Matchmaking")
     elif message.text == "Bot":
         print("")
         # Pbot()
 
-
 @bot.message_handler(commands=['startgame'])
 def start_game(message):
     start_game_message = "Game will begin. \n 2P or Bot?"
-    start_markup = telebot.types.ReplyKeyboardMarkup(
-        resize_keyboard=True, one_time_keyboard=True)
-    start_markup.row('2P', "Bot")
     sent = bot.send_message(
         message.chat.id, start_game_message, reply_markup=start_markup)
     bot.register_next_step_handler(sent, TwoPorBot)
-
 # Handle '/start' and '/help'
 @bot.message_handler(commands=['help', 'start'])
 def send_welcome(message):
