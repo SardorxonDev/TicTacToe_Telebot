@@ -2,7 +2,7 @@ import telebot
 from telebot.types import Message
 from telebot import types
 
-bot = telebot.TeleBot('')
+bot = telebot.TeleBot('1937149454:AAEfvc5kjTT1vOtIHD0iQ3DKAB9j3odOyBU')
 board = [" " for i in range(9)]
 opponentlist = []
 playermove = []
